@@ -11,8 +11,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class QueueFormer {
-    private List<Student> allStudents = new ArrayList();
-    private BlockingQueue<Student> queue = new ArrayBlockingQueue(50, true);
+    private List<Student> allStudents = new ArrayList<>();
+    private BlockingQueue<Student> queue = new ArrayBlockingQueue<>(50, true);
 
     {
         for (int i = 0; i < 200; i++) {
@@ -28,14 +28,26 @@ public class QueueFormer {
     }
 
     public void fill() {
-        while (queue.remainingCapacity() != 0) {
-            Random random = new Random();
+        Random random = new Random();
+        for (int i = 0; i < random.nextInt(queue.remainingCapacity()); i++) {
+            if (allStudents.isEmpty()) {
+                break;
+            }
+
             Student randomStudent = allStudents.get(random.nextInt(allStudents.size()));
-            queue.add(randomStudent);
+            try {
+                queue.put(randomStudent);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            allStudents.remove(randomStudent);
         }
     }
 
-    public void remove(int index) {
-        queue.remove(index);
+    public synchronized void check() {
+        if (queue.size() < 25) {
+            fill();
+        }
     }
+
 }
